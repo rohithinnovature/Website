@@ -25,14 +25,14 @@ const SignUpForm = () => {
                 email,
                 password
             },
-                // {
-                // headers: {
-                //     'Content-Type': 'application/json',
-                //     'X-CSRFToken': csrftoken  // Include CSRF token in the headers
-                // },
-                // withCredentials: true,
             );
-            alert("Sign-up successful");
+
+            axios.post('http://127.0.0.1:8000/authentication/signup2/', {
+                username,
+                email
+            },
+            );
+            
             console.log('Sign-up successful:', response.data);
             window.location.href = '/'
             // Handle successful sign-up, e.g., redirect to login page

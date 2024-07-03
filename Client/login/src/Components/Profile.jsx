@@ -9,52 +9,49 @@ import axios from "axios";
 const Profile = () => {
 
     const [cookies, setCookie, removeCookie] = useCookies(['user'])
-    const [email, setEmail] = useState('')
     const [profileData, setProfileData] = useState({
         username: '',
         first_name: '',
         last_name: '',
         email: '',
-        phone_number: '',
-        date_of_birth: ''
+        phone: '',
+        birthday: ''
     });
-
-    const usernamefromCookie = cookies.user
+    const [email, setEmail] = useState('')
     
-    useEffect(() => {
-        const fetchEmail = async (usernam) => {
-            try {
-                // Fetch email based on username
-                const response = await axios.post(`http://127.0.0.1:8000/authentication/get_user_email/`, {usernam: usernam});
-                setEmail(response.data.email) ;
-            } catch (error) {   
-                console.error('Error fetching email:', error);
-                return ''; // Return empty string or handle error appropriately
-            }
-        }
-        try{
-            fetchEmail(usernamefromCookie)
-        } catch (error) {
-            console.log(error);
-        }
-    }, [usernamefromCookie]
-    );
-    console.log(email)
-    console.log(profileData)
-
     // useEffect(() => {
-    //     // Fetch the profile data from the backend
-    //     async function fetchProfile() {
-    //         try {
-    //             const response = await fetch('/get_user_profile/');
-    //             const data = await response.json();
-    //             setProfileData(data); // Update profileData state with fetched data
-    //         } catch (error) {
-    //             console.error('Error fetching profile:', error);
-    //         }
-    //     }
-    //         fetchProfile();
-    //     }, []);
+        //     const fetchEmail = async (usernam) => {
+            //         try {
+                //             // Fetch email based on username
+                //             const response = await axios.post(`http://127.0.0.1:8000/authentication/get_user_email/`, {usernam: usernam});
+                //             console.log("response email "+response.data.email)
+                //             setEmail(response.data.email) ;
+                //         } catch (error) {   
+                    //             console.error('Error fetching email:', error);
+                    //             return ''; // Return empty string or handle error appropriately
+                    //         }
+                    //     }
+                    //         fetchEmail(usernamefromCookie)
+                    // },[]);
+                    
+                    useEffect(() => {
+                        // Fetch the profile data from the backend
+                        async function fetchProfile(usernam) {
+                            try {
+                                console.log("hello"+usernam)
+                                const response = await axios.post(`http://127.0.0.1:8000/authentication/get_user_profile/`, {usernam: usernam});
+                                console.log("ivide")
+                                console.log("responsive profile "+response.data.username)
+                                // const data = await response.json();
+                                setProfileData(response.data); // Update profileData state with fetched data
+                            } catch (error) {
+                                console.log("ivide error")
+                                console.error('Error fetching profile:', error);
+                            }
+                        }
+                        const usernamefromCookie = cookies.user
+                        fetchProfile(usernamefromCookie);
+                    }, []);
         // Function to handle input changes
         const handleInputChange = (e) => {
             const { name, value } = e.target;
@@ -84,8 +81,8 @@ const Profile = () => {
                                 id="inputUsername"
                                 name="username"
                                 value={profileData.username}
-                                //onChange={handleInputChange}
-                                readOnly
+                                onChange={handleInputChange}
+                                //readOnly
                             />
                         </div>
                         <div className="mb-3">
@@ -106,7 +103,7 @@ const Profile = () => {
                                 className="input-box"
                                 id="inputLastName"
                                 name="lastName"
-                                value={profileData.lastName}
+                                value={profileData.last_name}
                                 onChange={handleInputChange}
                             />
                         </div>
@@ -118,8 +115,8 @@ const Profile = () => {
                                 id="inputEmail"
                                 name="email"
                                 value={profileData.email}
-                                //onChange={handleInputChange}
-                                readOnly    
+                                onChange={handleInputChange}
+                                //readOnly    
                             />
                         </div>
                         <div className="mb-3">

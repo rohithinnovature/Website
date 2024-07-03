@@ -14,6 +14,7 @@ from django_recaptcha.fields import ReCaptchaField  # Assuming this is from djan
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.models import User
+from .models import UserProfile
 
 
 
@@ -28,6 +29,31 @@ def signup(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     return Response({'error': 'Method not allowed.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)        
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+# @csrf_exempt
+def signup2(request):
+    username = request.data.get('username')
+    email = request.data.get('email')
+    
+    if not username or not email:
+        return JsonResponse({'error': 'Both username and email must be provided'}, status=400)
+    
+    try:
+        user = User.objects.get(username=username)
+        user_profile, created = UserProfile.objects.get_or_create(username=user)
+        user_profile.email = email
+        user_profile.save()
+        
+        return JsonResponse({'message': 'UserProfile updated successfully'})
+    
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User does not exist'}, status=404)
+    
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -76,6 +102,37 @@ def get_user_email(request):
     # Return the email as a JSON response
     return JsonResponse({'email': email})
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@csrf_exempt
+def get_user_profile(request):
+    username = request.data.get('usernam')
+    print("ohello"+username)
+    if not username:
+        return JsonResponse ({'error': 'Username not provided'}, status=400)
+    
+    try:
+        user = User.objects.get(username=username)
+        user_profile = UserProfile.objects.get(username=user)
+        print("hohohohooh",user_profile)
+        print("jojojojoj",user_profile.username)
+        
+        response_data = {
+            'username': user_profile.username.username,
+            'first_name': '',#user_profile.first_name,
+            'last_name': '',#user_profile.last_name,
+            'email': user_profile.email,
+            'phone_number': '',#user_profile.phone_number,
+            'date_of_birth': '',#user_profile.date_of_birth,
+        }
+        print("HELLLLLO",response_data)
+        
+        return JsonResponse(response_data)
+    
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User does not exist'}, status=404)
+    except UserProfile.DoesNotExist:
+        return JsonResponse({'error': 'UserProfile does not exist'}, status=404)
 
 
 
