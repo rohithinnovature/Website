@@ -17,7 +17,6 @@ from django.contrib.auth.models import User
 from .models import UserProfile
 
 
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
 # @csrf_exempt
@@ -86,46 +85,27 @@ def verify_recaptcha(token):
     response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
     return response.json().get('success', False)
 
-@api_view(['POST'])
-@permission_classes([AllowAny])
-@csrf_exempt
-def get_user_email(request):
-    usernam = request.data.get('usernam')
-    if not usernam:
-        return JsonResponse ({'error': 'Username not provided'}, status=400)
-    # Retrieve the user object by username
-    user = get_object_or_404(User, username=usernam)
-    
-    # Get the email from the user object
-    email = user.email
-    
-    # Return the email as a JSON response
-    return JsonResponse({'email': email})
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 @csrf_exempt
 def get_user_profile(request):
     username = request.data.get('usernam')
-    print("ohello"+username)
     if not username:
         return JsonResponse ({'error': 'Username not provided'}, status=400)
     
     try:
         user = User.objects.get(username=username)
         user_profile = UserProfile.objects.get(username=user)
-        print("hohohohooh",user_profile)
-        print("jojojojoj",user_profile.username)
         
         response_data = {
             'username': user_profile.username.username,
-            'first_name': '',#user_profile.first_name,
-            'last_name': '',#user_profile.last_name,
+            'first_name':user_profile.first_name,
+            'last_name': user_profile.last_name,
             'email': user_profile.email,
-            'phone_number': '',#user_profile.phone_number,
-            'date_of_birth': '',#user_profile.date_of_birth,
+            'phone_number': user_profile.phone_number,
+            'date_of_birth': user_profile.date_of_birth,
         }
-        print("HELLLLLO",response_data)
         
         return JsonResponse(response_data)
     
@@ -134,19 +114,45 @@ def get_user_profile(request):
     except UserProfile.DoesNotExist:
         return JsonResponse({'error': 'UserProfile does not exist'}, status=404)
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@csrf_exempt
+def save_profile(request):
+    userpro = request.data.get('usernam')
+    if not userpro:
+        return JsonResponse ({'error': 'Username not provided'}, status=400)
+    err = {}
 
+    try :
+        k = userpro.get('first_name')
+        if ord(k[0]) < 65 or ord(k[0]) > 90 : 
+            err.update({'errorf':'First name must start with capital letter'})
+            print("capital error in fname")
+        k = userpro.get('last_name')
+        if ord(k[0]) < 65 or ord(k[0]) > 90 : 
+            err['errorl'] = 'Last name must start with capital letter'
+            print("capital error in fname")
+        if userpro.get('phone_number') :
+            k = userpro.get('phone_number')
+            print('ivide')    
+            if len(k) != 10 : 
+                print('phone number error')
+                err['errorP'] = "Phone number must be 10 digits"
+        if err : return JsonResponse(err)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
-# @api_view(['POST'])
-# def user_logout(request):
-#     if request.user.is_authenticated:
-#         logout(request)
-#         return Response({'message': 'Logout successful.'}, status=status.HTTP_200_OK)
-#     return Response({'error': 'Not authenticated.'}, status=status.HTTP_401_UNAUTHORIZED)
-
-# @api_view(['POST'])
-# @permission_classes([AllowAny])
-# def empty_path(request):
-#     # """
-#     # Placeholder view for an empty path.
-#     # """
-#     return Response({'message': 'This is an empty path.'})
+    try:
+        user = User.objects.get(username=userpro.get('username'))
+        user_profile, created = UserProfile.objects.get_or_create(username=user)
+        user_profile.first_name = userpro.get('first_name')
+        user_profile.last_name = userpro.get('last_name')
+        user_profile.date_of_birth = userpro.get('date_of_birth')
+        user_profile.phone_number = userpro.get('phone_number')
+        user_profile.save()
+        return JsonResponse({'message': 'UserProfile updated successfully'})
+    
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User does not exist'}, status=404)
+    except UserProfile.DoesNotExist:
+        return JsonResponse({'error': 'UserProfile does not exist'}, status=404)

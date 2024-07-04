@@ -14,44 +14,24 @@ const Profile = () => {
         first_name: '',
         last_name: '',
         email: '',
-        phone: '',
-        birthday: ''
+        phone_number: '',
+        date_of_birth: ''
     });
     const [email, setEmail] = useState('')
     
-    // useEffect(() => {
-        //     const fetchEmail = async (usernam) => {
-            //         try {
-                //             // Fetch email based on username
-                //             const response = await axios.post(`http://127.0.0.1:8000/authentication/get_user_email/`, {usernam: usernam});
-                //             console.log("response email "+response.data.email)
-                //             setEmail(response.data.email) ;
-                //         } catch (error) {   
-                    //             console.error('Error fetching email:', error);
-                    //             return ''; // Return empty string or handle error appropriately
-                    //         }
-                    //     }
-                    //         fetchEmail(usernamefromCookie)
-                    // },[]);
-                    
-                    useEffect(() => {
-                        // Fetch the profile data from the backend
-                        async function fetchProfile(usernam) {
-                            try {
-                                console.log("hello"+usernam)
-                                const response = await axios.post(`http://127.0.0.1:8000/authentication/get_user_profile/`, {usernam: usernam});
-                                console.log("ivide")
-                                console.log("responsive profile "+response.data.username)
-                                // const data = await response.json();
-                                setProfileData(response.data); // Update profileData state with fetched data
-                            } catch (error) {
-                                console.log("ivide error")
-                                console.error('Error fetching profile:', error);
-                            }
-                        }
-                        const usernamefromCookie = cookies.user
-                        fetchProfile(usernamefromCookie);
-                    }, []);
+    useEffect(() => {
+        // Fetch the profile data from the backend
+        async function fetchProfile(usernam) {
+            try {
+                const response = await axios.post(`http://127.0.0.1:8000/authentication/get_user_profile/`, {usernam: usernam});
+                setProfileData(response.data); // Update profileData state with fetched data
+            } catch (error) {
+                console.error('Error fetching profile:', error);
+            }
+        }
+        const usernamefromCookie = cookies.user
+        fetchProfile(usernamefromCookie);
+    }, []);
         // Function to handle input changes
         const handleInputChange = (e) => {
             const { name, value } = e.target;
@@ -59,10 +39,22 @@ const Profile = () => {
         };
     
         // Function to handle form submission
-        const handleSubmit = (e) => {
+        const handleSubmit = async (e) => {
             e.preventDefault();
-            // Logic to handle form submission (e.g., send data to server)
             console.log("Submitted:", profileData);
+            const response =  await axios.post(`http://127.0.0.1:8000/authentication/save_profile/`, {usernam: profileData});
+            if (response.data.message) {
+                alert(response.data.message)
+            }
+            if (response.data.errorf) {
+                alert(response.data.errorf)
+            }
+            if (response.data.errorl) {
+                alert(response.data.errorl)
+            }
+            if (response.data.errorP) {
+                alert(response.data.errorP)
+            }
         };
     return (
       <div>
@@ -82,7 +74,7 @@ const Profile = () => {
                                 name="username"
                                 value={profileData.username}
                                 onChange={handleInputChange}
-                                //readOnly
+                                readOnly
                             />
                         </div>
                         <div className="mb-3">
@@ -91,7 +83,7 @@ const Profile = () => {
                                 type="text"
                                 className="input-box"
                                 id="inputFirstName"
-                                name="firstName"
+                                name="first_name"
                                 value={profileData.first_name}
                                 onChange={handleInputChange}
                             />
@@ -102,7 +94,7 @@ const Profile = () => {
                                 type="text"
                                 className="input-box"
                                 id="inputLastName"
-                                name="lastName"
+                                name="last_name"
                                 value={profileData.last_name}
                                 onChange={handleInputChange}
                             />
@@ -116,17 +108,17 @@ const Profile = () => {
                                 name="email"
                                 value={profileData.email}
                                 onChange={handleInputChange}
-                                //readOnly    
+                                readOnly    
                             />
                         </div>
                         <div className="mb-3">
                             <input
                                 placeholder="Phone Number"
-                                type="tel"
+                                type="text"
                                 className="input-box"
                                 id="inputPhone"
-                                name="phone"
-                                value={profileData.phone}
+                                name="phone_number"
+                                value={profileData.phone_number}
                                 onChange={handleInputChange}
                             />
                         </div>
@@ -136,8 +128,8 @@ const Profile = () => {
                                 type="date"
                                 className="input-box"
                                 id="inputBirthday"
-                                name="birthday"
-                                value={profileData.birthday}
+                                name="date_of_birth"
+                                value={profileData.date_of_birth}
                                 onChange={handleInputChange}
                             />
                         </div>

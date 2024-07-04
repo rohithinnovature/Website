@@ -6,7 +6,7 @@ import SignUpForm from './Components/SignUpForm.jsx';
 import Topbar from './Components/Dashboard.jsx';
 import Profile from './Components/Profile.jsx';
 import {CookiesProvider,useCookies} from 'react-cookie'
-
+import Layout from './Components/Layout.jsx';
 // Wrap your entire application with Router component
 function App() {
   const [cookies,setCookie] = useCookies(['user'])
@@ -17,15 +17,17 @@ function App() {
   return (
     <CookiesProvider>
       <Router>
-        <div className="App">
-          <Routes>
-            <Route path="/" element={<LoginForm handlLog={handlLog}/>} />
-            <Route path="/login" element={<LoginForm />} />
-            <Route path="/signup" element={<SignUpForm />} />
-            <Route path="/dashboard" element={<Topbar/>} />
-            <Route path='/profile' element={<Profile/>} />
-          </Routes>
-        </div>
+        <Layout>
+          <div className="App">
+            <Routes>
+              <Route path="/" element={<LoginForm handlLog={handlLog}/>} />
+              <Route path="/login" element={<LoginForm />} />
+              <Route path="/signup" element={<SignUpForm />} />
+              <Route path="/dashboard" element={<Topbar/>} />
+              <Route path='/profile' element={<Profile/>} />
+            </Routes>
+          </div>
+        </Layout>
       </Router>
     </CookiesProvider>
   );
